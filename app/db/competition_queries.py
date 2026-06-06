@@ -141,6 +141,35 @@ def get_all_groups_most_likely() -> pd.DataFrame:
 
 
 @st.cache_data
+def get_all_groups_aggregate() -> pd.DataFrame:
+    """Representative per-team group-stage aggregates across all simulations.
+
+    Unlike get_all_groups_most_likely (which returns a single modal standing
+    that is dominated by the draw-free transitive "chalk" outcome), this returns
+    distributional expectations that summarise the whole 100k-sim distribution:
+
+      - avg_pts:     mean group-stage points
+      - avg_gd:      mean goal difference
+      - advance_pct: probability of advancing (top-2 OR best-3rd, via the
+                     pre-computed `advanced` flag)
+
+    Returns a long DataFrame with columns:
+        group_name, team, avg_pts, avg_gd, advance_pct
+    ordered by group then descending expected points (expected finish order).
+    """
+    con = get_db()
+    return con.execute("""
+        SELECT group_name, team,
+               ROUND(AVG(points), 1)            AS avg_pts,
+               ROUND(AVG(goal_difference), 1)   AS avg_gd,
+               ROUND(AVG(CASE WHEN advanced THEN 1 ELSE 0 END) * 100, 1) AS advance_pct
+        FROM group_standings
+        GROUP BY group_name, team
+        ORDER BY group_name, avg_pts DESC, avg_gd DESC
+    """).fetchdf()
+
+
+@st.cache_data
 def get_group_most_likely_standings(group_name: str, team_order: str) -> list[dict]:
     """Most representative stats for a specific group ordering.
 

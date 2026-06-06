@@ -166,6 +166,152 @@ def render_group_standing_table(rows: list[dict], group_name: str,
     st.markdown(table_html, unsafe_allow_html=True)
 
 
+# Advancement tiers: (min_pct_inclusive, label, dot_color)
+_ADV_TIERS = [
+    (90.0, "Lock",     "#22C55E"),
+    (70.0, "Safe",     "#4ADE80"),
+    (50.0, "Likely",   "#FACC15"),
+    (30.0, "Toss-up",  "#FB923C"),
+    (0.0,  "Longshot", "#EF4444"),
+]
+
+
+def _adv_tier(pct: float) -> tuple[str, str]:
+    """Return (label, color) for an advancement probability."""
+    for threshold, label, color in _ADV_TIERS:
+        if pct >= threshold:
+            return label, color
+    return _ADV_TIERS[-1][1], _ADV_TIERS[-1][2]
+
+
+# Drama thresholds: gap in advancement probability between the 2nd and 3rd
+# expected teams (the qualification cut line). Shared by the chip and the story
+# so they never disagree.
+_CLEAR_CUT_GAP = 28.0
+_CONTESTED_GAP = 12.0
+
+
+def _cutline_gap(rows: list[dict]) -> float:
+    """Advancement-probability gap between the 2nd and 3rd expected teams."""
+    return rows[1]["advance_pct"] - rows[2]["advance_pct"]
+
+
+def _group_drama(rows: list[dict]) -> tuple[str, str]:
+    """Classify a group's competitiveness from the qualification cut line.
+
+    The two automatic qualifying spots are settled when the 2nd expected team
+    is clearly separated from the 3rd. We measure that gap in advancement
+    probability (rows are sorted best-first):
+
+        gap = advance_pct(2nd) - advance_pct(3rd)
+
+    A wide gap means the top two are safe -> clear-cut. A narrow gap means the
+    second spot is genuinely up for grabs -> contested / group of death.
+
+    Returns (label, color).
+    """
+    if len(rows) < 3:
+        return "✅ Clear-cut", "#22C55E"
+    gap = _cutline_gap(rows)
+    if gap >= _CLEAR_CUT_GAP:
+        return "✅ Clear-cut", "#22C55E"
+    if gap >= _CONTESTED_GAP:
+        return "⚡ Contested", "#FB923C"
+    return "🔥 Group of Death", "#EF4444"
+
+
+def _group_story(rows: list[dict]) -> str:
+    """Generate a one-line narrative aligned with the drama classification.
+
+    Uses the same qualification-cut-line gap as _group_drama so the story and
+    the chip always tell a consistent tale. rows must be sorted best-first.
+    """
+    if len(rows) < 4:
+        return f"{rows[0]['team']} lead the group." if rows else ""
+
+    leader, second, third, fourth = rows[0], rows[1], rows[2], rows[3]
+    name = lambda r: r["team"]
+    gap = _cutline_gap(rows)
+
+    if gap >= _CLEAR_CUT_GAP:
+        # Top two clearly separated from the pack.
+        return (f"{name(leader)} and {name(second)} are strong favourites to advance; "
+                f"{name(third)} and {name(fourth)} are left chasing.")
+
+    if gap >= _CONTESTED_GAP:
+        # Leader fairly safe, second ticket fought over by 2nd and 3rd.
+        return (f"{name(leader)} should go through, but {name(second)} and "
+                f"{name(third)} will battle for the second spot.")
+
+    # Group of death: cut line is razor-thin.
+    if leader["advance_pct"] >= 80:
+        return (f"{name(leader)} look safe — but {name(second)}, {name(third)} and "
+                f"{name(fourth)} are all scrapping for the final ticket.")
+    return (f"Anyone's group: {name(leader)}, {name(second)}, {name(third)} and "
+            f"{name(fourth)} are separated by a whisker.")
+
+
+def render_group_aggregate_card(group_name: str, rows: list[dict]):
+    """Render a compact, representative group card for the overview grid.
+
+    Instead of one lucky single-simulation standing (which collapses onto a
+    draw-free 9-6-3-0), this shows distributional expectations: average points,
+    average goal difference, and each team's probability of advancing — plus a
+    drama chip and a one-line story for engagement.
+
+    Args:
+        group_name: Group letter.
+        rows: List of dicts (sorted best-first) with keys:
+              position, team, avg_pts, avg_gd, advance_pct.
+    """
+    drama_label, drama_color = _group_drama(rows)
+    header = (
+        f'<div class="wc-section-sub" style="display:flex; align-items:center; '
+        f'justify-content:space-between; gap:0.4rem;">'
+        f'<span>Group {group_name}</span>'
+        f'<span style="font-size:0.65rem; font-weight:700; color:{drama_color}; '
+        f'white-space:nowrap;">{drama_label}</span>'
+        f'</div>'
+    )
+
+    table_html = '<div class="wc-card-flat"><table class="wc-group-table"><thead><tr>'
+    table_html += '<th>#</th><th>Team</th><th>xPts</th><th>xGD</th><th>Adv</th>'
+    table_html += '</tr></thead><tbody>'
+
+    for r in rows:
+        flag = get_flag(r["team"])
+        adv = r["advance_pct"]
+        _, color = _adv_tier(adv)
+        row_class = "advanced" if adv >= 50.0 else "eliminated"
+        gd = r["avg_gd"]
+        gd_str = f"+{gd:.1f}" if gd > 0 else f"{gd:.1f}"
+        adv_cell = (
+            f'<span style="display:inline-block; width:7px; height:7px; '
+            f'border-radius:50%; background:{color}; margin-right:4px;"></span>'
+            f'<strong style="color:{color};">{adv:.0f}%</strong>'
+        )
+        table_html += f'<tr class="{row_class}">'
+        table_html += f'<td>{r["position"]}</td>'
+        table_html += f'<td>{flag} {r["team"]}</td>'
+        table_html += f'<td><strong>{r["avg_pts"]:.1f}</strong></td>'
+        table_html += f'<td>{gd_str}</td>'
+        table_html += f'<td>{adv_cell}</td>'
+        table_html += '</tr>'
+
+    table_html += '</tbody></table></div>'
+
+    story = _group_story(rows)
+    story_html = (
+        f'<div style="font-size:0.72rem; color:var(--wc-secondary); '
+        f'font-style:italic; margin:0.3rem 0 0.25rem; line-height:1.3;">{story}</div>'
+        if story else ""
+    )
+
+    st.markdown(header, unsafe_allow_html=True)
+    st.markdown(table_html, unsafe_allow_html=True)
+    st.markdown(story_html, unsafe_allow_html=True)
+
+
 def render_position_probabilities_heatmap(df):
     """Render a heatmap table of finishing position probabilities.
     

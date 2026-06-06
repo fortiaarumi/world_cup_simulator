@@ -7,8 +7,7 @@ import streamlit as st
 from db.competition_queries import (
     get_stage_matchups,
     get_matchup_results,
-    get_all_groups_most_likely,
-    get_group_most_likely_standings,
+    get_all_groups_aggregate,
     get_group_scenarios,
     get_third_place_advancement,
     get_head_to_head,
@@ -23,6 +22,7 @@ from ui.cards import (
     render_score_row,
     render_info_box,
     render_group_standing_table,
+    render_group_aggregate_card,
     render_position_probabilities_heatmap,
 )
 from ui.flags import team_with_flag, get_flag
@@ -440,34 +440,36 @@ elif selected_stage == "GROUP_STAGE":
             unsafe_allow_html=True,
         )
         st.caption(
-            "For each group, this shows the single most likely final standing "
-            "(the ordering that appeared most often across 100,000 simulations). "
-            "Percentages represent the likelihood of this exact group standing order."
+            "For each group: **expected points** and **goal difference** per team across "
+            "100,000 simulations, plus each team's **probability of advancing** (top-2 or as a "
+            "best 3rd-place team). Teams are ordered by expected points — a far more "
+            "representative picture than any single most-likely scoreline."
         )
 
-        groups_data = get_all_groups_most_likely()
+        agg = get_all_groups_aggregate()
+        group_names = sorted(agg["group_name"].unique())
 
         # Display in a 4x3 grid
-        for row_start in range(0, 12, 4):
+        for row_start in range(0, len(group_names), 4):
             cols = st.columns(4)
             for i, col in enumerate(cols):
                 grp_idx = row_start + i
-                if grp_idx >= len(groups_data):
+                if grp_idx >= len(group_names):
                     break
-                grp_row = groups_data.iloc[grp_idx]
-                group_name = grp_row["group_name"]
-                team_order = grp_row["team_order"]
-                prob = grp_row["probability"]
-
+                group_name = group_names[grp_idx]
+                grp_df = agg[agg["group_name"] == group_name].reset_index(drop=True)
+                rows = [
+                    {
+                        "position": pos + 1,
+                        "team": r["team"],
+                        "avg_pts": r["avg_pts"],
+                        "avg_gd": r["avg_gd"],
+                        "advance_pct": r["advance_pct"],
+                    }
+                    for pos, r in grp_df.iterrows()
+                ]
                 with col:
-                    rows = get_group_most_likely_standings(group_name, team_order)
-                    if not rows:
-                        teams = team_order.split(",")
-                        rows = [
-                            {"position": pos + 1, "team": team, "advanced": pos < 2}
-                            for pos, team in enumerate(teams)
-                        ]
-                    render_group_standing_table(rows, group_name, prob, compact=True)
+                    render_group_aggregate_card(group_name, rows)
 
     elif group_view == "Specific Group":
         # Specific group selector
