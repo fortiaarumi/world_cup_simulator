@@ -14,7 +14,7 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
-POLYMARKET_EVENT_SLUG = "2026-fifa-world-cup-winner-595"
+POLYMARKET_EVENT_SLUG = "world-cup-winner"
 GAMMA_API_URL = f"https://gamma-api.polymarket.com/events?slug={POLYMARKET_EVENT_SLUG}"
 
 

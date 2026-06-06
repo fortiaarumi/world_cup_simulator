@@ -321,13 +321,13 @@ if selected_stage == "WINNER":
     if poly_odds:
         st.caption(
             "Polymarket odds are fetched live from the "
-            "[2026 FIFA World Cup Winner](https://polymarket.com/event/2026-fifa-world-cup-winner-595) "
+            "[World Cup Winner](https://polymarket.com/event/world-cup-winner) "
             "prediction market and cached for 8 hours."
         )
     else:
         st.caption(
             "⚠️ Could not load Polymarket odds. Showing simulation data only. "
-            "[View on Polymarket →](https://polymarket.com/event/2026-fifa-world-cup-winner-595)"
+            "[View on Polymarket →](https://polymarket.com/event/world-cup-winner)"
         )
 
 # --- Head-to-Head view ---

@@ -5,6 +5,7 @@ Based on official FIFA schedule with exact venue assignments.
 
 from typing import Dict, List, Tuple
 from .venues import HostCity, HOST_CITIES, get_city_by_name
+from .third_place_table import THIRD_PLACE_ASSIGNMENTS, THIRD_PLACE_MATCH_ORDER
 
 
 # ============================================================================
@@ -182,104 +183,61 @@ FINAL_MATCH = (104, "New York/New Jersey")  # Winner SF1 vs Winner SF2
 
 
 # ============================================================================
-# THIRD-PLACE TEAM ASSIGNMENT TABLE
-# Maps combination of 8 qualifying groups to opponent for each group winner
-# Key: frozenset of 8 group letters that qualified their 3rd-place teams
-# Value: dict mapping winner slot (1A, 1B, 1D, 1E, 1G, 1I, 1K, 1L) to 3rd place group
+# THIRD-PLACE TEAM ALLOCATION (official FIFA Annex C table)
+#
+# When the group stage ends, the eight best third-placed teams advance. FIFA's
+# regulations (Annex C) predetermine — for each of the C(12,8) = 495 possible
+# combinations of which groups those eight teams come from — exactly which
+# Round-of-32 match each third-placed team is sent to. The table is built so a
+# third-placed team can NEVER be drawn against a group winner from its own
+# group (e.g. the Group G winner can never face Group G's third-placed team).
+#
+# The full 495-row table lives in third_place_table.py. THIRD_PLACE_POOLS below
+# records, for each affected match, the set of groups that table can ever send
+# there (the union across all 495 rows). Each pool excludes the winner's own
+# group, which is what structurally prevents a same-group rematch; the pools are
+# used to validate the table in the test-suite.
 # ============================================================================
-# Full table has 495 combinations; here are the key patterns simplified
-# The logic: based on which 8 groups send their 3rd place, determine matchups
 
-
-def get_third_place_assignments(qualifying_groups: set) -> Dict[str, str]:
-    """
-    Determine which third-place team plays which group winner.
-
-    Args:
-        qualifying_groups: Set of 8 group letters (A-L) whose 3rd place teams advance
-
-    Returns:
-        Dict mapping winner codes (1A, 1B, etc.) to third-place group letters
-    """
-    qg = frozenset(qualifying_groups)
-
-    # Simplified assignment logic based on FIFA rules
-    # The actual table has 495 rows, but follows patterns
-    # Group winners playing 3rd: 1A, 1B, 1D, 1E, 1G, 1I, 1K, 1L (8 winners)
-
-    # Default fallback - assign in order of group letter
-    third_groups = sorted(qg)
-
-    # Standard assignment patterns (simplified)
-    # This follows the FIFA constraint: a group winner cannot play their own group's 3rd
-    assignments = {}
-    available = list(third_groups)
-
-    winners_needing_3rd = ["1A", "1B", "1D", "1E", "1G", "1I", "1K", "1L"]
-
-    for winner in winners_needing_3rd:
-        winner_group = winner[1]  # Extract group letter
-
-        # Find a valid opponent (not from same group)
-        for g in available:
-            if g != winner_group:
-                assignments[winner] = f"3{g}"
-                available.remove(g)
-                break
-
-    return assignments
-
-
-# Build lookup table for the most common combinations
-# Key brackets in the R32 that need 3rd place teams:
-# Match 74: 1E vs 3rd from (A/B/C/D/F)
-# Match 77: 1I vs 3rd from (C/D/F/G/H)
-# Match 79: 1A vs 3rd from (C/E/F/H/I)
-# Match 80: 1L vs 3rd from (E/H/I/J/K)
-# Match 81: 1D vs 3rd from (B/E/F/I/J)
-# Match 82: 1G vs 3rd from (A/E/H/I/J)
-# Match 85: 1B vs 3rd from (E/F/G/I/J)
-# Match 87: 1K vs 3rd from (D/E/I/J/L)
-
+# For each "winner vs 3rd" R32 match, the groups whose third-placed team may be
+# assigned there under the official allocation.
 THIRD_PLACE_POOLS = {
-    74: set("ABCDF"),
-    77: set("CDFGH"),
-    79: set("CEFHI"),
-    80: set("EHIJK"),
-    81: set("BEFIJ"),
-    82: set("AEHIJ"),
-    85: set("EFGIJ"),
-    87: set("DEIJL"),
+    74: set("ABCDF"),  # 1E vs 3rd
+    77: set("CDFGH"),  # 1I vs 3rd
+    79: set("CEFHI"),  # 1A vs 3rd
+    80: set("EHIJK"),  # 1L vs 3rd
+    81: set("BEFIJ"),  # 1D vs 3rd
+    82: set("AEHIJ"),  # 1G vs 3rd
+    85: set("EFGIJ"),  # 1B vs 3rd
+    87: set("DEIJL"),  # 1K vs 3rd
 }
 
 
-def get_third_place_for_match(match_number: int, advancing_third_groups: set) -> str:
+def get_third_place_groups(advancing_groups: set) -> Dict[int, str]:
     """
-    Get which third-place team plays in a specific R32 match.
+    Resolve which third-placed group each Round-of-32 match hosts, using the
+    official FIFA Annex C allocation table.
 
     Args:
-        match_number: Match number (74, 77, 79, 80, 81, 82, 85, or 87)
-        advancing_third_groups: Set of 8 group letters whose 3rd teams advance
+        advancing_groups: the eight group letters whose third-placed teams
+            advanced to the knockout stage.
 
     Returns:
-        Group letter of the third-place team for this match
+        ``{match_number: third_place_group_letter}`` for the eight matches that
+        host a third-placed team (74, 77, 79, 80, 81, 82, 85, 87).
+
+    Raises:
+        ValueError: if ``advancing_groups`` is not one of the 495 valid
+            eight-group combinations.
     """
-    if match_number not in THIRD_PLACE_POOLS:
-        raise ValueError(f"Match {match_number} does not involve a 3rd place team")
-
-    pool = THIRD_PLACE_POOLS[match_number]
-    candidates = pool & advancing_third_groups
-
-    if not candidates:
-        raise ValueError(f"No valid 3rd place team for match {match_number}")
-
-    # Use defined priority (based on FIFA rules - prefer certain groups)
-    priority_order = list("ABCDEFGHIJKL")
-    for group in priority_order:
-        if group in candidates:
-            return group
-
-    return sorted(candidates)[0]
+    key = "".join(sorted(advancing_groups))
+    assigned = THIRD_PLACE_ASSIGNMENTS.get(key)
+    if assigned is None:
+        raise ValueError(
+            f"No FIFA third-place allocation for advancing groups {key!r}; "
+            "expected exactly eight distinct groups from A-L."
+        )
+    return dict(zip(THIRD_PLACE_MATCH_ORDER, assigned))
 
 
 def get_venue_for_match(match_number: int) -> HostCity:

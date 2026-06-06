@@ -18,7 +18,7 @@ from .schedule import (
     SEMI_FINALS_BRACKET,
     THIRD_PLACE_MATCH,
     FINAL_MATCH,
-    THIRD_PLACE_POOLS,
+    get_third_place_groups,
     VENUE_MAP,
 )
 
@@ -246,35 +246,22 @@ class Competition:
         
         return self.third_place_teams
     
-    def _get_third_place_for_match(self, match_number: int) -> Team:
+    def _assign_third_place_teams(self) -> Dict[int, Team]:
         """
-        Get which third-place team plays in a specific R32 match.
-        Uses the FIFA pool system.
+        Map each Round-of-32 "winner vs 3rd" match to its third-placed opponent
+        using the official FIFA Annex C allocation table.
+
+        The eight advancing third-placed teams are assigned solely by which
+        groups they finished third in, exactly as FIFA's predetermined table
+        dictates. Because every entry in that table keeps a third-placed team
+        out of the match hosting its own group's winner, this can never
+        reproduce a group-stage pairing (e.g. the Group G winner can never be
+        sent the Group G third-placed team in the Round of 32).
         """
-        if match_number not in THIRD_PLACE_POOLS:
-            raise ValueError(f"Match {match_number} does not involve a 3rd place team")
-        
-        pool = THIRD_PLACE_POOLS[match_number]
-        candidates = pool & self.advancing_third_groups
-        
-        if not candidates:
-            # Fallback to any available 3rd place team
-            available = {t.group.name for t in self.advancing_third_place 
-                        if not any(m.away_team == t or m.home_team == t 
-                                  for m in self.knockout_matches[STAGE.ROUND_OF_32])}
-            candidates = available
-        
-        # Use priority order (FIFA rules prefer certain groups)
-        priority_order = list('ABCDEFGHIJKL')
-        for group in priority_order:
-            if group in candidates:
-                # Find the team from this group
-                for team in self.advancing_third_place:
-                    if team.group.name == group:
-                        return team
-        
-        # Ultimate fallback
-        return self.advancing_third_place[0]
+        group_for_match = get_third_place_groups(self.advancing_third_groups)
+        team_by_group = {t.group.name: t for t in self.advancing_third_place}
+        return {match_num: team_by_group[group]
+                for match_num, group in group_for_match.items()}
     
     def _get_team_from_source(self, source: str, standings: Dict[str, List[Team]]) -> Optional[Team]:
         """
@@ -289,75 +276,45 @@ class Competition:
             elif pos == '2':
                 return standings[group][1]  # Runner-up
             elif pos == '3':
-                # Third place - handled by pool system
+                # Third place - resolved via the Annex C allocation table
                 return None
         return None
     
     def build_round_of_32(self) -> List[Match]:
         """
         Build the EXACT Round of 32 bracket per FIFA rules.
-        Uses the official pairings and venues.
+        Uses the official pairings, venues and third-place allocation table.
         """
         standings = self.get_group_standings()
         matches = []
-        used_third_place = set()  # Track which groups' 3rd place teams are used
-        
+        # Resolve every third-placed opponent up front from the official FIFA
+        # Annex C table, keyed on which eight groups' 3rd-place teams advanced.
+        third_place_by_match = self._assign_third_place_teams()
+
         # Build matches 73-88 following exact FIFA bracket
         for match_num in sorted(ROUND_OF_32_BRACKET.keys()):
             city_name, pairing_type, source1, source2 = ROUND_OF_32_BRACKET[match_num]
             city = self._get_venue(city_name)
-            
+
             match = self._create_match(match_num, STAGE.ROUND_OF_32, city)
-            
-            if pairing_type == "2v2":
-                # Runner-up vs Runner-up
-                team1 = self._get_team_from_source(source1, standings)
-                team2 = self._get_team_from_source(source2, standings)
-            elif pairing_type == "1v2":
-                # Winner vs Runner-up
+
+            if pairing_type in ("2v2", "1v2"):
+                # Runner-up vs Runner-up, or Winner vs Runner-up
                 team1 = self._get_team_from_source(source1, standings)
                 team2 = self._get_team_from_source(source2, standings)
             elif pairing_type == "1v3":
-                # Winner vs 3rd place (from pool)
+                # Winner vs 3rd place (per official Annex C allocation)
                 team1 = self._get_team_from_source(source1, standings)
-                team2 = self._get_third_place_for_match_with_tracking(match_num, used_third_place)
+                team2 = third_place_by_match[match_num]
             else:
                 raise ValueError(f"Unknown pairing type: {pairing_type}")
-            
+
             match.assign_teams(team1, team2)
             matches.append(match)
-        
+
         self.knockout_matches[STAGE.ROUND_OF_32] = matches
         self.match_counter = 88
         return matches
-    
-    def _get_third_place_for_match_with_tracking(self, match_number: int, 
-                                                   used_groups: set) -> Team:
-        """Get third-place team for a match, tracking which are already used."""
-        if match_number not in THIRD_PLACE_POOLS:
-            raise ValueError(f"Match {match_number} does not involve a 3rd place team")
-        
-        pool = THIRD_PLACE_POOLS[match_number]
-        
-        # Available candidates: in the pool, qualified, and not yet assigned
-        candidates = pool & self.advancing_third_groups - used_groups
-        
-        if not candidates:
-            # Widen search if pool is exhausted
-            candidates = self.advancing_third_groups - used_groups
-        
-        if not candidates:
-            raise ValueError(f"No available 3rd place team for match {match_number}")
-        
-        # Use priority order
-        for group in 'ABCDEFGHIJKL':
-            if group in candidates:
-                used_groups.add(group)
-                for team in self.advancing_third_place:
-                    if team.group.name == group:
-                        return team
-        
-        raise ValueError(f"Could not find team for match {match_number}")
     
     def play_knockout_round(self, stage: STAGE) -> List[Team]:
         """Play all matches in a knockout round and return winners."""

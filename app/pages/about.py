@@ -50,19 +50,19 @@ with tab_info:
 
     # 2. Articles section
     st.markdown('<div class="wc-section-header">📚 Articles</div>', unsafe_allow_html=True)
-    # st.markdown(
-    #     """
-    #     Read detailed walkthroughs and insights about how the simulation was built:
-    #     * [**Simulating the 2026 FIFA World Cup**](https://medium.com/@anzekravanja/4be4693d66b3) - *Medium*
-    #     * *More articles coming soon...*
-    #     """
-    # )
     st.markdown(
         """
         Read detailed walkthroughs and insights about how the simulation was built:
-        * Articles coming soon...
+        * [**I Simulated the 2026 World Cup 100,000 Times to Buy One Ticket**](https://medium.com/@anzekravanja/4be4693d66b3) - *Medium*
+        * *More articles coming soon...*
         """
     )
+    # st.markdown(
+    #     """
+    #     Read detailed walkthroughs and insights about how the simulation was built:
+    #     * Articles coming soon...
+    #     """
+    # )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
