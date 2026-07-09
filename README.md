@@ -1,6 +1,6 @@
-# FIFA World Cup 2026 Simulation Explorer (WIP)
+# FIFA World Cup 2026 — Simulation & Live Prediction
 
-An interactive Streamlit dashboard that visualizes the results of 100,000 FIFA World Cup 2026 tournament simulations. Explore tournament outcomes through multiple lenses: overall competition, individual teams, and host cities.
+An end-to-end simulation and live prediction system for the 2026 FIFA World Cup. It combines a Poisson regression goal model (trained on 7 World Cups of historical data) with a live web scraper that ingests real match statistics as the tournament progresses — enabling updated predictions for each knockout round.
 
 ## Features
 
@@ -9,6 +9,7 @@ An interactive Streamlit dashboard that visualizes the results of 100,000 FIFA W
 - **Team Explorer** — Per-team tournament path, outcome distribution, and likely opponents by stage
 - **City Explorer** — Host city matchup projections across 16 venues in the USA, Mexico, and Canada
 - **Simulator** — Adjust team ranks with sliders to run custom simulations and compare results against the baseline
+- **Live Knockout PDF Reports** — Per-round PDF predictions generated from real scraped match data (Round of 32, 16, Quarter-finals)
 
 ## Match Prediction Model
 
@@ -177,11 +178,11 @@ The app will be available at `http://localhost:8501`.
 
 ## Deployment
 
-A Dockerfile is included for deploying to Google Cloud Run:
+A Dockerfile is included for deploying to a container service (e.g. Google Cloud Run, Fly.io, Railway):
 
 ```bash
-gcloud run deploy fifa-wc-2026-simulation --source . --region=us-central1 \
-  --platform=managed --min-instances=1 --allow-unauthenticated
+docker build -t wc2026 .
+docker run -p 8501:8501 wc2026
 ```
 
 ## Data Sources
@@ -189,3 +190,27 @@ gcloud run deploy fifa-wc-2026-simulation --source . --region=us-central1 \
 - **Historical match data**: [jfjelstul/worldcup](https://github.com/jfjelstul/worldcup) — World Cup match results, standings, and metadata (1930–2022)
 - **2026 team roster**: Manually curated in `data/wc_2026_teams.json` — 48 teams with group assignments, FIFA rankings, and confederations
 - **Historical FIFA rankings**: `data/wc_teams.csv` / `data/wc_teams.json` — FIFA rankings for each team before their respective World Cup edition (1998–2022)
+- **Live 2026 match stats**: Scraped from Flashscore via `data_scraper.py` — xG, corners, cards for each 2026 match
+
+## Knockout Round Predictions
+
+PDF prediction reports are generated after each round using real scraped data to update team dynamic ranks:
+
+| File | Round | Status |
+|------|-------|--------|
+| `Prediccions_Setzens_CAT_WC2026.pdf` | Round of 32 | ✅ Done |
+| `Prediccions_Vuitens_CAT_WC2026.pdf` | Round of 16 | ✅ Done |
+| `Prediccions_Quarts_CAT_WC2026.pdf` | Quarter-finals | ✅ Done |
+
+To regenerate a report after scraping new data:
+
+```bash
+# 1. Add Flashscore match URLs to data/ro16_urls.txt (or ro8_urls.txt)
+python data_scraper.py ro16_urls.txt
+
+# 2. Update dynamic team ranks
+python update_live_ranks.py
+
+# 3. Generate the PDF report
+python generate_ro16_report.py   # or generate_ro8_report.py
+```

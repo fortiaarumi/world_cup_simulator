@@ -1,0 +1,47 @@
+﻿# =====================================================
+# URLS VUITENS DE FINAL - MUNDIAL 2026
+# =====================================================
+# Enganxa aqui les URLs de Flashscore dels 8 partits
+# de vuitens de final (Round of 16) jugats.
+#
+# FORMAT esperat (una URL per linia):
+# https://www.flashscore.es/partido/futbol/<equip-local-id>/<equip-visitant-id>/resumen/estadisticas/general/?mid=XXXXXXXX
+#
+# Elimina les linies de comentari (que comencen per #)
+# i deixa nomes les URLs reals.
+#
+# PARTITS VUITENS DE FINAL (4-8 juliol 2026):
+# PARTIT 1: France vs Paraguay
+# PARTIT 2: Canada vs Morocco
+# PARTIT 3: Spain vs Portugal
+# PARTIT 4: Belgium vs USA
+# PARTIT 5: Brazil vs Norway
+# PARTIT 6: England vs Mexico
+# PARTIT 7: Argentina vs Egypt
+# PARTIT 8: Colombia vs Switzerland
+# =====================================================
+
+# PARTIT 1: France vs Paraguay
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/francia-QkGeVG1n/paraguay-YaNlqp6j/resumen/estadisticas/general/?mid=M5YPKKbB
+# PARTIT 2: Canada vs Morocco
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/canada-x4toKORL/marruecos-IDKYO3R8/resumen/estadisticas/general/?mid=pUYfr7u3
+# PARTIT 3: Spain vs Portugal
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/espana-bLyo6mco/portugal-WvJrjFVN/resumen/estadisticas/general/?mid=tbTsReVa
+# PARTIT 4: Belgium vs USA
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/belgica-GbB957na/usa-fuitL4CF/resumen/estadisticas/general/?mid=xhRXm8PG
+# PARTIT 5: Brazil vs Norway
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/brasil-I9l9aqLq/noruega-8rP6JO0H/resumen/estadisticas/general/?mid=tpOhKWcC
+# PARTIT 6: England vs Mexico
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/inglaterra-j9N9ZNFA/mexico-O6iHcNkd/resumen/estadisticas/general/?mid=bc27lzfo
+# PARTIT 7: Argentina vs Egypt
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/argentina-f9OppQjp/egipto-bejDn7NN/resumen/estadisticas/general/?mid=bodsDyte
+# PARTIT 8: Colombia vs Switzerland
+# ENGANXA LA URL AQUI:
+https://www.flashscore.es/partido/futbol/colombia-G02s4PCS/suiza-rHJ2vy1B/resumen/estadisticas/general/?mid=EmgOlMbT

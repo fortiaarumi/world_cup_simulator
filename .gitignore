@@ -225,3 +225,12 @@ __marimo__/
 data/db/
 articles/
 .DS_Store
+# Large generated files
+*.duckdb
+downloaded_files/
+data/db/
+data/partidos.csv
+data/partidos_2.csv
+check_ro16.py
+audit_ranks.py
+
