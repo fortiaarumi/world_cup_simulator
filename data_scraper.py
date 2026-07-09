@@ -55,8 +55,12 @@ def extraer_partido_completo(url, driver):
             datos_partido['equipo_local'] = equipos_unicos[0]
             datos_partido['equipo_visitante'] = equipos_unicos[1]
             
-        marcador = soup.find(class_=lambda x: x and isinstance(x, str) and 'detailScore' in x)
-        if marcador: datos_partido['resultado'] = marcador.text.replace('\n', '').strip()
+        # detailScore__wrapper conté els gols FT com a nodes de text directes (ex: "0" i "1")
+        # El selector generic 'detailScore' agafava "Finalizado" (un element d'estat)
+        marcador = soup.find(class_=lambda x: x and 'detailScore__wrapper' in str(x))
+        if not marcador:
+            marcador = soup.find(class_=lambda x: x and 'fixedScore' in str(x))
+        if marcador: datos_partido['resultado'] = marcador.get_text(separator='-', strip=True)
 
         todos_los_divs = soup.find_all('div')
         for div in todos_los_divs:
@@ -88,8 +92,8 @@ def formatear_para_simulador(datos_partido):
         "date": datos_partido['fecha'].split(" ")[0] if datos_partido['fecha'] != 'Desconocida' else "2026-06-01",
         "team1": datos_partido['equipo_local'],
         "team2": datos_partido['equipo_visitante'],
-        "g1": parse_int(datos_partido['resultado'].split('-')[0]) if '-' in datos_partido['resultado'] else 0,
-        "g2": parse_int(datos_partido['resultado'].split('-')[1]) if '-' in datos_partido['resultado'] else 0,
+        "g1": parse_int([x for x in datos_partido['resultado'].split('-') if x.strip()][0]) if '-' in datos_partido['resultado'] else 0,
+        "g2": parse_int([x for x in datos_partido['resultado'].split('-') if x.strip()][1]) if '-' in datos_partido['resultado'] else 0,
         # Claus reals de Flashscore (en espanyol)
         "xg1": parse_float((stats.get('Goles esperados (xG)', {}) or stats.get('xG', {})).get('local', '0')),
         "xg2": parse_float((stats.get('Goles esperados (xG)', {}) or stats.get('xG', {})).get('visitante', '0')),

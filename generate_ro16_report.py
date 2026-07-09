@@ -217,15 +217,8 @@ def main():
             c_h, crd_h = 5.0, 2.0
             c_a, crd_a = 5.0, 2.0
             
-        # Shrinkage cap: blend XGBoost prediction toward WC baseline to avoid
-        # inflation from teams that faced weak opponents. WC knockout avg ~9.5 corners.
-        WC_BASELINE_CORNERS = 9.5
-        WC_BASELINE_CARDS = 3.5
-        SHRINK = 0.40  # 40% pull toward baseline
-        raw_corners = float(c_h + c_a)
-        raw_cards = float(crd_h + crd_a)
-        total_corners_lam = raw_corners * (1 - SHRINK) + WC_BASELINE_CORNERS * SHRINK
-        total_cards_lam = raw_cards * (1 - SHRINK) + WC_BASELINE_CARDS * SHRINK
+        total_corners_lam = float(c_h + c_a)
+        total_cards_lam = float(crd_h + crd_a)
         
         def get_prob_over(lam, over_val):
             return 1.0 - sum(poisson.pmf(k, lam) for k in range(int(over_val) + 1))

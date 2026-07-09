@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from scipy.stats import poisson
 
 from engine import Match, STAGE
@@ -17,6 +18,26 @@ from model.preprocessing import (
 # Cache for the trained model (loaded once on first use)
 _MODEL_CACHE = None
 _EXPANDED_MODEL_CACHE = None
+_XGB_CORNERS_CACHE = None
+_XGB_CARDS_CACHE = None
+
+def _load_xgb_corners():
+    global _XGB_CORNERS_CACHE
+    if _XGB_CORNERS_CACHE is None:
+        model_path = Path(__file__).parent.parent / "model" / "xgb_corners.pkl"
+        if model_path.exists():
+            with open(model_path, "rb") as f:
+                _XGB_CORNERS_CACHE = pickle.load(f)
+    return _XGB_CORNERS_CACHE
+
+def _load_xgb_cards():
+    global _XGB_CARDS_CACHE
+    if _XGB_CARDS_CACHE is None:
+        model_path = Path(__file__).parent.parent / "model" / "xgb_cards.pkl"
+        if model_path.exists():
+            with open(model_path, "rb") as f:
+                _XGB_CARDS_CACHE = pickle.load(f)
+    return _XGB_CARDS_CACHE
 
 
 def _load_model():
@@ -326,6 +347,52 @@ class ModeledMatch(Match):
 
         self.home_score = sampled_index // _MAX_GOALS
         self.away_score = sampled_index % _MAX_GOALS
+
+        # Nou codi: Predir córners i targetes amb XGBoost
+        xgb_corners = _load_xgb_corners()
+        xgb_cards = _load_xgb_cards()
+        if xgb_corners is not None and xgb_cards is not None:
+            # Stats (avoiding division by zero by assuming 1 match played min)
+            h_mp = max(1, getattr(self.home_team, "matches_played", 1))
+            a_mp = max(1, getattr(self.away_team, "matches_played", 1))
+            
+            h_avg_c_for = getattr(self.home_team, "corners_for", 0) / h_mp
+            h_avg_c_ag = getattr(self.home_team, "corners_against", 0) / h_mp
+            a_avg_c_for = getattr(self.away_team, "corners_for", 0) / a_mp
+            a_avg_c_ag = getattr(self.away_team, "corners_against", 0) / a_mp
+            
+            h_avg_card_for = getattr(self.home_team, "cards_for", 0) / h_mp
+            a_avg_card_for = getattr(self.away_team, "cards_for", 0) / a_mp
+            
+            rank_diff = self.away_team.fifa_rank - self.home_team.fifa_rank
+            
+            # Predict Corners
+            X_corners_home = pd.DataFrame([[self.home_team.fifa_rank, self.away_team.fifa_rank, rank_diff, h_avg_c_for, a_avg_c_ag]], 
+                                        columns=['team_rank', 'opp_rank', 'rank_diff', 'avg_corners_for', 'opp_avg_corners_against'])
+            X_corners_away = pd.DataFrame([[self.away_team.fifa_rank, self.home_team.fifa_rank, -rank_diff, a_avg_c_for, h_avg_c_ag]],
+                                        columns=['team_rank', 'opp_rank', 'rank_diff', 'avg_corners_for', 'opp_avg_corners_against'])
+                                        
+            exp_hc = max(0.1, xgb_corners.predict(X_corners_home)[0])
+            exp_ac = max(0.1, xgb_corners.predict(X_corners_away)[0])
+            
+            # Predict Cards
+            X_cards_home = pd.DataFrame([[self.home_team.fifa_rank, self.away_team.fifa_rank, rank_diff, h_avg_card_for]],
+                                      columns=['team_rank', 'opp_rank', 'rank_diff', 'avg_cards_for'])
+            X_cards_away = pd.DataFrame([[self.away_team.fifa_rank, self.home_team.fifa_rank, -rank_diff, a_avg_card_for]],
+                                      columns=['team_rank', 'opp_rank', 'rank_diff', 'avg_cards_for'])
+                                      
+            exp_hcard = max(0.1, xgb_cards.predict(X_cards_home)[0])
+            exp_acard = max(0.1, xgb_cards.predict(X_cards_away)[0])
+            
+            self.home_corners = np.random.poisson(exp_hc)
+            self.away_corners = np.random.poisson(exp_ac)
+            self.home_cards = np.random.poisson(exp_hcard)
+            self.away_cards = np.random.poisson(exp_acard)
+        else:
+            self.home_corners = 0
+            self.away_corners = 0
+            self.home_cards = 0
+            self.away_cards = 0
 
         # Update dynamic ranks for both teams
         # Snapshot opponent ranks at kickoff before any updates

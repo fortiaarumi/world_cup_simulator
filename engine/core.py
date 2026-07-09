@@ -129,6 +129,10 @@ class Match:
         self.away_team: Optional[Team] = None
         self.home_score: Optional[int] = None
         self.away_score: Optional[int] = None
+        self.home_corners: Optional[int] = None
+        self.away_corners: Optional[int] = None
+        self.home_cards: Optional[int] = None
+        self.away_cards: Optional[int] = None
         
         # Use provided RNG or create new one
         self._rng = rng if rng is not None else random.Random()

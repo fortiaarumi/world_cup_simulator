@@ -11,7 +11,7 @@ import pandas as pd
 STRONG_CONFEDS = {"UEFA", "CONMEBOL"}
 
 
-def calculate_rank_shift(rank_a, rank_b, result, shape=1.5, k_mul=5):
+def calculate_rank_shift(rank_a, rank_b, result, shape=1.5, k_mul=5, xg_a=None, xg_b=None):
     """Calculate Elo-style rank shift for general rank.
 
     Parameters
@@ -26,6 +26,10 @@ def calculate_rank_shift(rank_a, rank_b, result, shape=1.5, k_mul=5):
         Exponent controlling win-expectation curve steepness.
     k_mul : float
         Multiplier for the k-factor (controls shift magnitude).
+    xg_a : float, optional
+        Expected goals for team A.
+    xg_b : float, optional
+        Expected goals for team B.
 
     Returns
     -------
@@ -35,8 +39,16 @@ def calculate_rank_shift(rank_a, rank_b, result, shape=1.5, k_mul=5):
     """
     r_a = max(1.0, rank_a)
     r_b = max(1.0, rank_b)
-    expected_a = 1 / (1 + (r_a / r_b) ** shape)
+    
     k_factor = np.log1p(abs(r_a - r_b)) * k_mul
+    
+    if xg_a is not None and xg_b is not None:
+        # A positive (xg_a - xg_b) means team A performed better,
+        # so their rank should improve (decrease). Hence the negative sign.
+        shift = - k_factor * (xg_a - xg_b)
+        return shift
+        
+    expected_a = 1 / (1 + (r_a / r_b) ** shape)
     shift = k_factor * (expected_a - result)
     return shift
 

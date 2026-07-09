@@ -1,0 +1,73 @@
+﻿Fecha,Equipo_Local,Equipo_Visitante,Goles_Local,Goles_Visitante,Resultado_1X2,Jugado
+2026-06-11,México,Sudáfrica,2.0,0.0,1,True
+2026-06-12,Canadá,Bosnia-Herzegovina,1.0,1.0,X,True
+2026-06-12,Corea del Sur,República Checa,2.0,1.0,1,True
+2026-06-13,EE. UU.,Paraguay,4.0,1.0,1,True
+2026-06-13,Catar,Suiza,1.0,1.0,X,True
+2026-06-14,Haití,Escocia,0.0,1.0,2,True
+2026-06-14,Países Bajos,Japón,2.0,2.0,X,True
+2026-06-14,Australia,Turquía,2.0,0.0,1,True
+2026-06-14,Brasil,Marruecos,1.0,1.0,X,True
+2026-06-14,Alemania,Curazao,7.0,1.0,1,True
+2026-06-15,Costa de Marfil,Ecuador,1.0,0.0,1,True
+2026-06-15,Bélgica,Egipto,1.0,1.0,X,True
+2026-06-15,Suecia,Túnez,5.0,1.0,1,True
+2026-06-15,España,Cabo Verde,0.0,0.0,X,True
+2026-06-16,Francia,Senegal,3.0,1.0,1,True
+2026-06-16,Irán,Nueva Zelanda,2.0,2.0,X,True
+2026-06-16,Arabia Saudí,Uruguay,1.0,1.0,X,True
+2026-06-17,Portugal,RD Congo,1.0,1.0,X,True
+2026-06-17,Argentina,Argelia,3.0,0.0,1,True
+2026-06-17,Irak,Noruega,1.0,4.0,2,True
+2026-06-17,Inglaterra,Croacia,4.0,2.0,1,True
+2026-06-17,Austria,Jordania,3.0,1.0,1,True
+2026-06-18,Ghana,Panamá,1.0,0.0,1,True
+2026-06-18,Suiza,Bosnia-Herzegovina,4.0,1.0,1,True
+2026-06-18,Uzbekistán,Colombia,1.0,3.0,2,True
+2026-06-18,República Checa,Sudáfrica,1.0,1.0,X,True
+2026-06-19,EE. UU.,Australia,2.0,0.0,1,True
+2026-06-19,Canadá,Catar,6.0,0.0,1,True
+2026-06-19,México,Corea del Sur,1.0,0.0,1,True
+2026-06-20,Brasil,Haití,3.0,0.0,1,True
+2026-06-20,Escocia,Marruecos,0.0,1.0,2,True
+2026-06-20,Turquía,Paraguay,0.0,1.0,2,True
+2026-06-20,Países Bajos,Suecia,5.0,1.0,1,True
+2026-06-20,Alemania,Costa de Marfil,2.0,1.0,1,True
+2026-06-21,Bélgica,Irán,0.0,0.0,X,True
+2026-06-21,España,Arabia Saudí,4.0,0.0,1,True
+2026-06-21,Ecuador,Curazao,0.0,0.0,X,True
+2026-06-21,Túnez,Japón,0.0,4.0,2,True
+2026-06-22,Nueva Zelanda,Egipto,1.0,3.0,2,True
+2026-06-22,Francia,Irak,3.0,0.0,1,True
+2026-06-22,Argentina,Austria,2.0,0.0,1,True
+2026-06-22,Uruguay,Cabo Verde,2.0,2.0,X,True
+2026-06-23,Jordania,Argelia,1.0,2.0,2,True
+2026-06-23,Noruega,Senegal,3.0,2.0,1,True
+2026-06-23,Portugal,Uzbekistán,5.0,0.0,1,True
+2026-06-23,Inglaterra,Ghana,0.0,0.0,X,True
+2026-06-24,Panamá,Croacia,0.0,1.0,2,True
+2026-06-24,Bosnia-Herzegovina,Catar,3.0,1.0,1,True
+2026-06-24,Suiza,Canadá,2.0,1.0,1,True
+2026-06-24,Colombia,RD Congo,1.0,0.0,1,True
+2026-06-25,Escocia,Brasil,0.0,3.0,2,True
+2026-06-25,Sudáfrica,Corea del Sur,1.0,0.0,1,True
+2026-06-25,Marruecos,Haití,4.0,2.0,1,True
+2026-06-25,República Checa,México,0.0,3.0,2,True
+2026-06-25,Ecuador,Alemania,2.0,1.0,1,True
+2026-06-25,Curazao,Costa de Marfil,0.0,2.0,2,True
+2026-06-26,Turquía,EE. UU.,3.0,2.0,1,True
+2026-06-26,Senegal,Irak,5.0,0.0,1,True
+2026-06-26,Túnez,Países Bajos,1.0,3.0,2,True
+2026-06-26,Japón,Suecia,1.0,1.0,X,True
+2026-06-26,Paraguay,Australia,0.0,0.0,X,True
+2026-06-26,Noruega,Francia,1.0,4.0,2,True
+2026-06-27,Nueva Zelanda,Bélgica,1.0,5.0,2,True
+2026-06-27,Egipto,Irán,1.0,1.0,X,True
+2026-06-27,Panamá,Inglaterra,0.0,2.0,2,True
+2026-06-27,Uruguay,España,0.0,1.0,2,True
+2026-06-27,Croacia,Ghana,2.0,1.0,1,True
+2026-06-27,Cabo Verde,Arabia Saudí,0.0,0.0,X,True
+2026-06-28,Jordania,Argentina,1.0,3.0,2,True
+2026-06-28,RD Congo,Uzbekistán,3.0,1.0,1,True
+2026-06-28,Argelia,Austria,3.0,3.0,X,True
+2026-06-28,Colombia,Portugal,0.0,0.0,X,True

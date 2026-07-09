@@ -1,0 +1,19 @@
+=== PARTITS DEL MUNDIAL DE JULIOL (KNOCKOUTS) EN EL JSON ===
+[03.07.2026] Portugal 2 - 0 Croacia  
+[02.07.2026] España 3 - 0 Austria  
+[02.07.2026] EE. UU. 2 - 0 Bosnia-Herzegovina  
+[01.07.2026] Bélgica 3 - 0 Senegal  
+[01.07.2026] México 2 - 0 Ecuador  
+[01.07.2026] Inglaterra 2 - 0 RD Congo  
+[04.07.2026] Argentina 3 - 0 Cabo Verde  
+[03.07.2026] Australia 1 - 0 Egipto  
+[03.07.2026] Suiza 2 - 0 Argelia  
+[04.07.2026] Colombia 1 - 0 Ghana  
+[04.07.2026] Paraguay 0 - 0 Francia  ⚠️ POTENCIALMENT INCORRECTE
+[04.07.2026] Canadá 0 - 0 Marruecos  ⚠️ POTENCIALMENT INCORRECTE
+[06.07.2026] Portugal 0 - 0 España  ⚠️ POTENCIALMENT INCORRECTE
+[07.07.2026] EE. UU. 1 - 0 Bélgica  
+[05.07.2026] Brasil 1 - 0 Noruega  
+[06.07.2026] México 2 - 0 Inglaterra  
+[07.07.2026] Argentina 3 - 0 Egipto  
+[07.07.2026] Suiza 0 - 0 Colombia  ⚠️ POTENCIALMENT INCORRECTE
