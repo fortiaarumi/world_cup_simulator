@@ -281,9 +281,13 @@ def apply_match_to_ranks(teams: dict, match: dict, pp: dict) -> tuple:
 
     reversion_rate = pp.get("reversion_rate", 0.0)
     shape   = pp["shape"]
-    k_mul   = pp["k_mul"]
-    k_off   = pp["k_off_mul"]
-    k_def   = pp["k_def_mul"]
+    
+    is_friendly = (match.get("group") == "Amistós")
+    weight_factor = 0.5 if is_friendly else 1.0
+    
+    k_mul   = pp["k_mul"] * weight_factor
+    k_off   = pp["k_off_mul"] * weight_factor
+    k_def   = pp["k_def_mul"] * weight_factor
     goal_cap = pp["goal_cap"]
 
     def apply_reversion(val, base_val):
@@ -432,6 +436,21 @@ def main():
         if t1_norm not in teams or t2_norm not in teams:
             continue
         date_norm = norm_date_str(m.get("date", ""))
+        
+        if date_norm < "2026-06-11":
+            if m.get("g1") is not None and m.get("g2") is not None:
+                knockout_candidates.append({
+                    "date": date_norm,
+                    "group": "Amistós",
+                    "team1": t1_norm,
+                    "team2": t2_norm,
+                    "g1": int(m["g1"]),
+                    "g2": int(m["g2"]),
+                    "xg1": m.get("xg1"),
+                    "xg2": m.get("xg2"),
+                })
+            continue
+
         if date_norm < KNOCKOUT_START:
             continue  # Ignorar amistosos anteriors a les eliminatòries
         if m.get("g1") is None or m.get("g2") is None:

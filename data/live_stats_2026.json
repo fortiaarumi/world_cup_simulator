@@ -3652,6 +3652,84 @@
       "corners2": 7,
       "cards1": 3,
       "cards2": 2
+    },
+    {
+      "date": "12.07.2026",
+      "team1": "Argentina",
+      "team2": "Suiza",
+      "g1": 3,
+      "g2": 1,
+      "xg1": 1.94,
+      "xg2": 0.46,
+      "corners1": 8,
+      "corners2": 2,
+      "cards1": 3,
+      "cards2": 3
+    },
+    {
+      "date": "11.07.2026",
+      "team1": "Noruega",
+      "team2": "Inglaterra",
+      "g1": 1,
+      "g2": 2,
+      "xg1": 0.68,
+      "xg2": 1.04,
+      "corners1": 7,
+      "corners2": 4,
+      "cards1": 1,
+      "cards2": 0
+    },
+    {
+      "date": "10.07.2026",
+      "team1": "España",
+      "team2": "Bélgica",
+      "g1": 2,
+      "g2": 1,
+      "xg1": 1.96,
+      "xg2": 0.35,
+      "corners1": 5,
+      "corners2": 1,
+      "cards1": 2,
+      "cards2": 2
+    },
+    {
+      "date": "09.07.2026",
+      "team1": "Francia",
+      "team2": "Marruecos",
+      "g1": 2,
+      "g2": 0,
+      "xg1": 3.68,
+      "xg2": 0.14,
+      "corners1": 5,
+      "corners2": 5,
+      "cards1": 0,
+      "cards2": 1
+    },
+    {
+      "date": "15.07.2026",
+      "team1": "Inglaterra",
+      "team2": "Argentina",
+      "g1": 1,
+      "g2": 2,
+      "xg1": 0.52,
+      "xg2": 1.59,
+      "corners1": 1,
+      "corners2": 6,
+      "cards1": 1,
+      "cards2": 3
+    },
+    {
+      "date": "14.07.2026",
+      "team1": "Francia",
+      "team2": "España",
+      "g1": 0,
+      "g2": 2,
+      "xg1": 0.31,
+      "xg2": 1.63,
+      "corners1": 7,
+      "corners2": 1,
+      "cards1": 2,
+      "cards2": 1
     }
   ]
 }
